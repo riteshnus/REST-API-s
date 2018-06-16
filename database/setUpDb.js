@@ -16,6 +16,7 @@ class database {
     }
 
     connect(){
+        console.log(process.env.PGUSERNAME, process.env.HOST, process.env.DATABASENAME,process.env.PGPORT)
         this.pool = new Pool ({
             user: process.env.PGUSERNAME,
             host: process.env.HOST,
