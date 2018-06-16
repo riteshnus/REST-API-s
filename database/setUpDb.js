@@ -16,7 +16,6 @@ class database {
     }
 
     connect(){
-        var config = require('../config');
         this.pool = new Pool ({
             user: process.env.PGUSERNAME,
             host: process.env.HOST,

@@ -14,12 +14,8 @@ exports.insertTeacher = (body) => {
         const value = [body.teacher];
 
         setUpDb.query(query, value)
-            .then(response => {
-                resolve(response.rows)
-            })
-            .catch(err => {
-                reject(err)
-            })
+            .then(response => resolve(response.rows))
+            .catch(err => reject(err))
     })
 }
 
@@ -31,11 +27,10 @@ exports.registerStudent = (body) => {
         body.students.forEach(ele => {
             setUpDb.query(query, [ele])
                 .then((res) => {
-                    console.log('check student', res.rows.length)
                     if (res.rows.length === 0) {
                         this.insertStudent(ele)
                             .then(() => {})
-                            .catch((err) => reject(err))
+                            .catch(err => reject(err))
                     }
 
                     this.insertTeacherStudent(body.teacher, ele)
@@ -45,7 +40,7 @@ exports.registerStudent = (body) => {
                                 resolve()
                             }
                         })
-                        .catch((err) => reject(err))
+                        .catch(err => reject(err))
                 })
                 .catch(err => {
                     new Error('student can not insert')
@@ -59,79 +54,18 @@ exports.insertStudent = (email) => {
         setUpDb.connect();
         const query = 'INSERT INTO students("email","status") VALUES ($1, $2) RETURNING *'
 
-        /*setUpDb.query(query, value)
-            .then(response => {
-                console.log('teacher success')
-                this.insertStudent(body, () => {
-                    resolve(response)
-                })
-            })
-            .catch(err => {
-                console.log('error', err);
-                reject(err)
-            })*/
-
-        // body.students.forEach(ele => {
             setUpDb.query(query, [email, true])
-                .then(() => {
-                    console.log('student success')
-                    /*count = count+1;
-                    if(count === body.students.length) {
-                        this.insertTeacherStudent(body, (msg)=>{
-                            if(msg)
-                                reject(msg)
-                            else
-                                resolve()
-                        })
-                    }*/
-                    resolve();
-                })
-                .catch(err => {
-                    reject(err)
-                })
+                .then(() => resolve())
+                .catch(err => reject(err))
         })
-    // })
 }
-
-/*exports.insertStudent = (body, callback) => {
-    const studentsInsert = 'INSERT INTO students("email","status") VALUES ($1, $2) RETURNING *'
-    let count = 0;
-    body.students.forEach(ele => {
-        setUpDb.query(studentsInsert, [ele, true])
-            .then(() => {
-                console.log('student success')
-                count = count+1;
-                if(count === body.students.length) {
-                    this.insertTeacherStudent(body, ()=>{
-                        callback()
-                    })
-                }
-            })
-            .catch(err => {
-                console.log(err)
-                // reject(err)
-            })
-    })
-}*/
 
 exports.insertTeacherStudent = (teacher,studentEmail) => {
     return new Promise((resolve, reject) => {
     const teachersStudentsInsert = 'INSERT INTO teachers_students("teacher_email", "student_email") VALUES ($1, $2) RETURNING *'
-    let count = 0;
-    // body.students.forEach(ele => {
         setUpDb.query(teachersStudentsInsert, [teacher, studentEmail])
-            .then(() => {
-                console.log('teachers_students success')
-                /*count = count+1;
-                if(count === body.students.length) {
-                    callback()
-                }*/
-                resolve()
-            })
-            .catch(err => {
-                // callback(err)
-                reject(err)
-            })
+            .then(() => resolve())
+            .catch(err => reject(err))
     })
 }
 
@@ -156,19 +90,15 @@ const findDup = (query, type, callback) => {
     let result = [];
     setUpDb.textQuery(query)
         .then(response => {
-            console.log('findCommonStudents success ', response.rows)
             let queryResponseArray = response.rows.map(ele => ele.student_email)
             if(type){
                 result = queryResponseArray.filter((ele,index)=>index!==queryResponseArray.indexOf(ele))}
             else {
                 result = queryResponseArray
             }
-            console.log('result', result)
             callback('success', result);
         })
-        .catch(err => {
-            callback('err', err);
-        })
+        .catch(err => callback('err', err))
 }
 
 exports.updateSuspend = function (body) {
@@ -184,10 +114,7 @@ exports.updateSuspend = function (body) {
                 else
                     reject('student didn\'t found');
             })
-            .catch(err => {
-                console.log('error', err);
-                reject(err)
-            })
+            .catch(err => reject(err))
     })
 }
 
@@ -198,12 +125,8 @@ exports.findActiveStudent = function (body) {
         const values = [true, body.teacher];
 
         setUpDb.query(query, values)
-            .then(response => {
-                resolve(response.rows.map(ele => ele.email))
-            })
-            .catch(err => {
-                reject(err)
-            })
+            .then(response => resolve(response.rows.map(ele => ele.email)))
+            .catch(err => reject(err))
     })
 }
 

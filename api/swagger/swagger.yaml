@@ -1,0 +1,199 @@
+swagger: '2.0'
+info:
+  description: >-
+    This is a webservices to register teacher, student and other services .
+  version: 1.0.0
+  title: UFINITY Web Services
+  contact:
+    email: ritesh.nus@gmail.com
+host: ec2-18-222-149-167.us-east-2.compute.amazonaws.com
+basePath: /api
+tags:
+- name: "Registration"
+  description: "Registration of student and teacher"
+- name: "Common Student"
+  description: "Common student for multiple teacher"
+- name: "Suspend"
+  description: "Suspend student"
+- name: "Notification"
+  description: "Send notification to students"
+schemes:
+  - http
+paths:
+  /registerteacher:
+    post:
+      tags:
+        - Registration
+      summary: Register Teacher
+      description: Register teacher in database, give error if duplicate teacher add. Every teacher is unique by email
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: provide teacher email
+          required: true
+          schema:
+            $ref: "#/definitions/registerteacher"
+      responses:
+        '204':
+          description: successful operation
+  /register:
+    post:
+      tags:
+        - Registration
+      summary: Register Student
+      description: Register student in database. First check if student exist, if not then insert new student. Also insert mapping of student and teacher.
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: provide teacher email and student email
+          required: true
+          schema:
+            $ref: "#/definitions/register"
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/register'
+  /commonstudents:
+    get:
+      tags:
+        - Common Student
+      summary: Finds common studnents
+      description: Finds common studnents for provided teacher
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Container'
+  /suspend:
+    post:
+      tags:
+        - Suspend
+      summary: Suspend student
+      description: Suspend a student from the class
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: provide teacher email and student email
+          required: true
+          schema:
+            $ref: "#/definitions/register"
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/register'
+  /retrievefornotifications:
+    post:
+      tags:
+        - Notification
+      summary: Find student of notification
+      description: Find student of teacher to send notification
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: provide teacher email and student email
+          required: true
+          schema:
+            $ref: "#/definitions/register"
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/register'
+definitions:
+  Container:
+    type: object
+    properties:
+      contId:
+        type: integer
+        format: int64
+      contType:
+        type: string
+      contVolume:
+        type: string
+      missions:
+        type: array
+        items:
+          $ref: '#/definitions/Mission'
+  Mission:
+    type: object
+    properties:
+      missionId:
+        type: integer
+        format: int64
+      missionMetadata:
+        type: object
+      transitionUpdate:
+        type: object
+  Missions:
+    type: object
+    properties:
+      missions:
+        type: array
+        items:
+          $ref: '#/definitions/Mission'
+  login:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        format: int64
+      password:
+        type: string
+        format: password
+    example:
+      email: xyz@abc.com
+      password: "12345"
+  register:
+    type: object
+    required:
+      - teacher
+      - students
+    properties:
+      teacher:
+        type: string
+        format: int64
+      students:
+        type: array
+        items:
+          $ref: '#/definitions/Mission'
+    example:
+      teacher: xyz@abc.com
+      students: ['abc@def.com']
+  registerteacher:
+    type: object
+    required:
+      - teacher
+    properties:
+      teacher:
+        type: string
+        format: int64
+    example:
+      teacher: xyz@abc.com
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      message:
+        type: string

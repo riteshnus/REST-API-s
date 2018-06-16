@@ -11,7 +11,6 @@ exports.teacherRegistration = (req, res, next) => {
     query.insertTeacher(req.body)
         .then(() => res.sendStatus(204))
         .catch(err => {
-            console.log(err)
             let error = new Error(handleError(err));
             error.statusCode = 400;
             next(error)
@@ -22,7 +21,6 @@ exports.studentRegistration = (req, res, next) => {
     query.registerStudent(req.body)
         .then(() => res.sendStatus(204))
         .catch(err => {
-            console.log(err)
             let error = new Error(handleError(err));
             error.statusCode = 400;
             next(error)
@@ -33,7 +31,6 @@ exports.commonStudents = (req, res, next) => {
     query.findCommonStudents(req.query.teacher)
         .then(response => res.json({'students': response}))
         .catch(err => {
-            console.log('error', err)
             let error = new Error(handleError(err));
             error.statusCode = 400;
             next(error)
@@ -44,7 +41,6 @@ exports.suspendStudent = (req, res, next) => {
     query.updateSuspend(req.body)
         .then(() => res.sendStatus(204))
         .catch(err => {
-            console.log('error', err)
             let error = new Error(err);
             error.statusCode = 400;
             next(error)
@@ -58,11 +54,9 @@ exports.retrievefornotification = (req, res, next) => {
                 if (ele.charAt(0) === constant.at)
                     response.push(ele.substring(1))
             })
-            console.log('students', response)
             res.json({'recipients': response});
         })
         .catch(err => {
-            console.log('error', err)
             let error = new Error(handleError(err));
             error.statusCode = 400;
             next(error)
