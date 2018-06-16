@@ -1,0 +1,21 @@
+{
+  "name": "ufinity",
+  "version": "0.0.0",
+  "description": "Ufinity Online Test",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon -r dotenv/config"
+  },
+  "dependencies": {
+    "debug": "~2.6.9",
+    "dotenv": "^6.0.0",
+    "express": "~4.16.0",
+    "morgan": "~1.9.0",
+    "pg": "^7.4.3"
+  },
+  "author": "Ritesh Kumar",
+  "devDependencies": {
+    "nodemon": "^1.17.5"
+  }
+}
