@@ -1,3 +1,9 @@
+/**
+ * @Author Ritesh
+ * @Date 6/16/2018
+ * @Description
+ */
+
 const { Pool } = require('pg');
 
 class database {
@@ -9,20 +15,14 @@ class database {
         this.pool;
     }
 
-    /*user: process.env.USERNAME,
-    host: process.env.HOST,
-    database: process.env.DATABASENAME,
-    password: process.env.PASSWORD,
-    port: process.env.PORT || 5432,*/
-
     connect(){
         var config = require('../config');
         this.pool = new Pool ({
-            user: config.postGresDb.username,
-            host: config.postGresDb.host,
-            database: config.postGresDb.databaseName,
-            password: config.postGresDb.password,
-            port: config.postGresDb.port || 5432,
+            user: process.env.PGUSERNAME,
+            host: process.env.HOST,
+            database: process.env.DATABASENAME,
+            password: process.env.PASSWORD,
+            port: process.env.PGPORT || 5432,
         })
 
         this.pool.on('error', (err) => {

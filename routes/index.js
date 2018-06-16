@@ -1,6 +1,12 @@
-var express = require('express');
-var router = express.Router();
-var path = require('path');
+/**
+ * @Author Ritesh
+ * @Date 6/16/2018
+ * @Description
+ */
+
+var express = require('express'),
+    router = express.Router(),
+    path = require('path');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

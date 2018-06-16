@@ -1,3 +1,9 @@
+/**
+ * @Author Ritesh
+ * @Date 6/16/2018
+ * @Description
+ */
+
 const query = require('../database/query');
 const constant = require('../constant');
 

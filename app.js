@@ -1,15 +1,19 @@
+/**
+ * @Author Ritesh
+ * @Date 6/16/2018
+ * @Description
+ */
+
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var indexRouter = require('./routes/index');
-// require('dotenv').config()
 
 var app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 
