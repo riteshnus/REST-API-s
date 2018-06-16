@@ -18,11 +18,11 @@ class database {
     connect(){
         var config = require('../config');
         this.pool = new Pool ({
-            user: process.env.USERNAME,
-            host: process.env.HOST,
-            database: process.env.DATABASENAME,
-            password: process.env.PASSWORD,
-            port: process.env.PORT || 5432,
+            user: config.postGresDb.username,
+            host: config.postGresDb.host,
+            database: config.postGresDb.databaseName,
+            password: config.postGresDb.password,
+            port: config.postGresDb.port || 5432,
         })
 
         this.pool.on('error', (err) => {
