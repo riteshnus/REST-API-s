@@ -11,6 +11,7 @@ exports.teacherRegistration = (req, res, next) => {
     query.insertTeacher(req.body)
         .then(() => res.sendStatus(204))
         .catch(err => {
+            console.log(err);
             let error = new Error(handleError(err));
             error.statusCode = 400;
             next(error)
