@@ -4,7 +4,7 @@ class database {
 
     constructor(){
         if(this.instance){
-            throw new Error("can create a new instance, use 'getInstance'  method")
+            throw new Error("can create a new instance, use 'getInstance' method")
         }
         this.pool;
     }
