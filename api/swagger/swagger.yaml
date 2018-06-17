@@ -38,6 +38,8 @@ paths:
       responses:
         '204':
           description: successful operation
+        400:
+          description: "duplicate email"
   /register:
     post:
       tags:
@@ -54,10 +56,10 @@ paths:
           schema:
             $ref: "#/definitions/register"
       responses:
-        '200':
+        '204':
           description: successful operation
-          schema:
-            $ref: '#/definitions/register'
+        400:
+          description: "duplicate email"
   /commonstudents:
     get:
       tags:
@@ -66,14 +68,17 @@ paths:
       description: Finds common studnents for provided teacher
       produces:
         - application/json
-      parameters: []
+      parameters:
+        - name: "teacher"
+          in: "query"
+          description: "teacher email"
+          required: true
+          type: "string"
       responses:
         '200':
-          description: successful operation
+          description: common students
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Container'
+              $ref: '#/definitions/studentArray'
   /suspend:
     post:
       tags:
@@ -88,12 +93,10 @@ paths:
           description: provide teacher email and student email
           required: true
           schema:
-            $ref: "#/definitions/register"
+            $ref: "#/definitions/student"
       responses:
-        '200':
+        '204':
           description: successful operation
-          schema:
-            $ref: '#/definitions/register'
   /retrievefornotifications:
     post:
       tags:
@@ -108,59 +111,17 @@ paths:
           description: provide teacher email and student email
           required: true
           schema:
-            $ref: "#/definitions/register"
+            $ref: "#/definitions/notification"
       responses:
         '200':
           description: successful operation
           schema:
-            $ref: '#/definitions/register'
+            $ref: '#/definitions/recipients'
 definitions:
-  Container:
-    type: object
-    properties:
-      contId:
-        type: integer
-        format: int64
-      contType:
-        type: string
-      contVolume:
-        type: string
-      missions:
-        type: array
-        items:
-          $ref: '#/definitions/Mission'
-  Mission:
-    type: object
-    properties:
-      missionId:
-        type: integer
-        format: int64
-      missionMetadata:
-        type: object
-      transitionUpdate:
-        type: object
-  Missions:
-    type: object
-    properties:
-      missions:
-        type: array
-        items:
-          $ref: '#/definitions/Mission'
-  login:
-    type: object
-    required:
-      - email
-      - password
-    properties:
-      email:
-        type: string
-        format: int64
-      password:
-        type: string
-        format: password
-    example:
-      email: xyz@abc.com
-      password: "12345"
+  string:
+    type: string
+    format: int64
+    example: 'student@gmail.com'
   register:
     type: object
     required:
@@ -173,10 +134,36 @@ definitions:
       students:
         type: array
         items:
-          $ref: '#/definitions/Mission'
+          $ref: '#/definitions/string'
     example:
       teacher: xyz@abc.com
       students: ['abc@def.com']
+  notification:
+    type: object
+    required:
+      - teacher
+      - notification
+    properties:
+      teacher:
+        type: string
+        format: int64
+      notification:
+        type: string
+        format: int64
+    example:
+      teacher: xyz@abc.com
+      notification: ['Hello students! @studentagnes@example.com @studentmiche@example.com']
+  recipients:
+    type: object
+    required:
+      - recipients
+    properties:
+      recipients:
+        type: array
+        items:
+          $ref: '#/definitions/string'
+    example:
+      recipients: ['studentagnes@example.com','studentmiche@example.com']
   registerteacher:
     type: object
     required:
@@ -187,13 +174,22 @@ definitions:
         format: int64
     example:
       teacher: xyz@abc.com
-  ApiResponse:
+  studentArray:
+    type: object
+    required:
+      - recipients
+    properties:
+      students:
+        type: array
+        items:
+          $ref: '#/definitions/string'
+    example:
+      students: ['abc@def.com','efg@xyz.com']
+  student:
     type: object
     properties:
-      code:
-        type: integer
-        format: int32
-      type:
+      student:
         type: string
-      message:
-        type: string
+        format: int64
+    example:
+      student: 'abc@def.com'

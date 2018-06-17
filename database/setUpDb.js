@@ -1,7 +1,7 @@
 /**
  * @Author Ritesh
  * @Date 6/16/2018
- * @Description
+ * @Description: Setup the postgres database
  */
 
 const { Pool } = require('pg');

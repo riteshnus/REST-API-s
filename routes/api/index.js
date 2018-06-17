@@ -1,13 +1,16 @@
 /**
  * @Author Ritesh
  * @Date 6/16/2018
- * @Description
+ * @Description: Webservice EndPoints
  */
+
 
 var router = require('express').Router({mergeParams: true}),
     apiController = require('../../controller/apiController');
 
-// Routes
+/**
+ * Different webservice end points, call respective Http method
+ */
 router.route('/registerteacher')
     .post(apiController.teacherRegistration)
 

@@ -1,12 +1,13 @@
 /**
  * @Author Ritesh
  * @Date 6/16/2018
- * @Description
+ * @Description: Controller class to handle request endpoints
  */
 
 const query = require('../database/query');
 const constant = require('../constant');
 
+/**Teacher registration */
 exports.teacherRegistration = (req, res, next) => {
     query.insertTeacher(req.body)
         .then(() => res.sendStatus(204))
@@ -18,6 +19,7 @@ exports.teacherRegistration = (req, res, next) => {
         })
 }
 
+/**Student registration */
 exports.studentRegistration = (req, res, next) => {
     query.registerStudent(req.body)
         .then(() => res.sendStatus(204))
@@ -28,6 +30,7 @@ exports.studentRegistration = (req, res, next) => {
         })
 }
 
+/**Common Students*/
 exports.commonStudents = (req, res, next) => {
     query.findCommonStudents(req.query.teacher)
         .then(response => res.json({'students': response}))
@@ -38,6 +41,7 @@ exports.commonStudents = (req, res, next) => {
         })
 }
 
+/**Suspend Student*/
 exports.suspendStudent = (req, res, next) => {
     query.updateSuspend(req.body)
         .then(() => res.sendStatus(204))
@@ -48,6 +52,7 @@ exports.suspendStudent = (req, res, next) => {
         })
 }
 
+/**Notification list*/
 exports.retrievefornotification = (req, res, next) => {
     query.findActiveStudent(req.body)
         .then(response => {
@@ -64,6 +69,7 @@ exports.retrievefornotification = (req, res, next) => {
         })
 }
 
+/**Handle error*/
 const handleError = (err) => {
     let message;
     if (err.detail) {

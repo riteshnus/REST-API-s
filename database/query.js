@@ -1,12 +1,13 @@
 /**
  * @Author Ritesh
  * @Date 6/16/2018
- * @Description
+ * @Description: Query calls
  */
 
 const setUpDb = require('./setUpDb');
 const constant = require('../constant');
 
+/** Query to insert teacher */
 exports.insertTeacher = (body) => {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
@@ -19,6 +20,7 @@ exports.insertTeacher = (body) => {
     })
 }
 
+/** Query to register student */
 exports.registerStudent = (body) => {
     let count = 0;
     return new Promise((resolve, reject) => {
@@ -49,6 +51,7 @@ exports.registerStudent = (body) => {
     })
 }
 
+/** Query to insert student*/
 exports.insertStudent = (email) => {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
@@ -60,6 +63,7 @@ exports.insertStudent = (email) => {
         })
 }
 
+/** Query to insert teacher student table*/
 exports.insertTeacherStudent = (teacher,studentEmail) => {
     return new Promise((resolve, reject) => {
     const teachersStudentsInsert = 'INSERT INTO teachers_students("teacher_email", "student_email") VALUES ($1, $2) RETURNING *'
@@ -69,6 +73,7 @@ exports.insertTeacherStudent = (teacher,studentEmail) => {
     })
 }
 
+/** Query to find common students */
 exports.findCommonStudents = (params) => {
     return new Promise((resolve, reject) => {
         let type = Array.isArray(params);
@@ -86,6 +91,7 @@ exports.findCommonStudents = (params) => {
     })
 }
 
+/** Method to find duplicated in array*/
 const findDup = (query, type, callback) => {
     let result = [];
     setUpDb.textQuery(query)
@@ -101,6 +107,7 @@ const findDup = (query, type, callback) => {
         .catch(err => callback('err', err))
 }
 
+/** suspend the students */
 exports.updateSuspend = function (body) {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
@@ -118,6 +125,7 @@ exports.updateSuspend = function (body) {
     })
 }
 
+/** find active students for notification*/
 exports.findActiveStudent = function (body) {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
