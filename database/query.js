@@ -20,7 +20,7 @@ exports.insertTeacher = (body) => {
     })
 }
 
-/** Query to register student */
+/** Query to register student, response only send when loop completed */
 exports.registerStudent = (body) => {
     let count = 0;
     return new Promise((resolve, reject) => {
@@ -77,34 +77,49 @@ exports.insertTeacherStudent = (teacher,studentEmail) => {
 exports.findCommonStudents = (params) => {
     return new Promise((resolve, reject) => {
         let type = Array.isArray(params);
-        setUpDb.connect();
-        let query = 'SELECT student_email from teachers_students WHERE teacher_email in ( \''+ params + '\' )'
-        if(type){
-            query = 'SELECT student_email from teachers_students WHERE teacher_email in ( \''+ params.join('\',\'') + '\' )'
-        }
-        findDup(query,type, (status, result) => {
+        findStudentsTeacher(type, params, (status,result) => {
             if(status === constant.success)
                 resolve(result)
             else
-                reject(result);
+                reject(reject)
         })
     })
 }
 
-/** Method to find duplicated in array*/
-const findDup = (query, type, callback) => {
-    let result = [];
-    setUpDb.textQuery(query)
-        .then(response => {
-            let queryResponseArray = response.rows.map(ele => ele.student_email)
-            if(type){
-                result = queryResponseArray.filter((ele,index)=>index!==queryResponseArray.indexOf(ele))}
-            else {
-                result = queryResponseArray
-            }
-            callback('success', result);
+/** Query for student teacher mapping, response only send when loop completed*/
+const findStudentsTeacher = (type, params,callback) => {
+    let query = 'SELECT student_email from teachers_students WHERE teacher_email in ';
+    let result = [], count = 0;
+    setUpDb.connect();
+    if(type){
+        params.forEach(ele => {
+            setUpDb.textQuery(query+'( \''+ ele + '\')')
+                .then(res => {
+                    result.push(res.rows.map(ele => ele.student_email))
+                    count = count+1;
+                    if(count === params.length) {
+                        callback('success',findIntersection(result))
+                    }
+                })
+                .catch(err => callback('fail',err))
         })
-        .catch(err => callback('err', err))
+    }else {
+        setUpDb.textQuery(query+'( \''+ params + '\')')
+            .then(res => callback('success',res.rows.map(ele => ele.student_email)))
+            .catch()
+    }
+}
+
+/** Method to intersection values in array of array*/
+const findIntersection= (arrays) => {
+        var copyArray = arrays.slice(),
+            baseArray = copyArray.pop();
+
+        return baseArray.filter(function(item) {
+            return copyArray.every(function(itemList) {
+                return itemList.indexOf(item) !== -1;
+            });
+        });
 }
 
 /** suspend the students */

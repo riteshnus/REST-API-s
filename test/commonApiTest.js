@@ -65,7 +65,6 @@ describe("All Api Test", () => {
                 .send(testJson.notification)
                 .end((err, res) => {
                     res.should.have.status(200);
-                    console.log(res.body)
                     res.body.recipients.should.be.a('array');
                     done();
                 })
