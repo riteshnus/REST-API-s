@@ -12,7 +12,9 @@ Steps to deploy:
 
 3- npm start ('npm run dev' for development)
 
-4- cloud deployment run 'npm run pm2-start' on server for process manager
+4- npm run test ()
+
+5- cloud deployment run 'npm run pm2-start' on server for process manager
 
 
 

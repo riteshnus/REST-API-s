@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node -r dotenv/config ./bin/www",
     "pm2-start": "pm2 start ./bin/www",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "test": "mocha test --timeout 15000"
   },
   "dependencies": {
     "debug": "~2.6.9",
@@ -17,6 +18,9 @@
   },
   "author": "Ritesh Kumar",
   "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
+    "mocha": "^5.2.0",
     "nodemon": "^1.17.5"
   }
 }

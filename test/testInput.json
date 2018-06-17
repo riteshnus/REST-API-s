@@ -1,0 +1,21 @@
+{
+  "registerTeacher": {
+    "teacher": "teacherken3@gmail.com"
+  },
+  "registerStudent":{
+    "teacher": "teacherken3@gmail.com",
+    "students":
+    [
+      "studentjon1@example.com",
+      "studentjon4@example.com",
+      "studentjon6@example.com"
+    ]
+  },
+  "suspendStudent": {
+    "student" : "studentjon4@example.com"
+  },
+  "notification": {
+    "teacher":  "teacherken3@gmail.com",
+    "notification": "Hello students! @studentagnes@example.com @studentmiche@example.com"
+  }
+}
