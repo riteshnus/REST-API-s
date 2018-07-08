@@ -6,14 +6,13 @@
 
 const setUpDb = require('./setUpDb');
 const constant = require('../constant');
-const schema = process.env.SCHEMA;
 
 /** Query to insert teacher */
 exports.insertTeacher = (body) => {
     return new Promise((resolve, reject) => {
         if(checkEmail(body.teacher)){
             setUpDb.connect();
-            const query = `INSERT INTO ${schema}.teachers("email") VALUES ($1) RETURNING email`
+            const query = `INSERT INTO ${process.env.SCHEMA}.teachers("email") VALUES ($1) RETURNING email`
             setUpDb.query(query, [body.teacher])
                 .then(response => resolve(response.rows))
                 .catch(err => reject(err))
@@ -71,7 +70,6 @@ exports.registerStudent = (body) => {
                                                 console.log('check student_teacher row === 1')
                                                 count = count + 1;
                                                 reject('Student '+ele+' already register under teacher')
-                                                // (count === body.students.length ? reject('Student '+ele+' already register under teacher') : '')
                                             }
                                         })
                                         .catch(err => reject(err))
@@ -89,7 +87,7 @@ exports.registerStudent = (body) => {
 const checkTeacher = (teacherEmail) => {
     return new Promise((resolve, reject) => {
         if (checkEmail(teacherEmail)) {
-            const query = `Select * from ${schema}.teachers where email= $1`
+            const query = `Select * from ${process.env.SCHEMA}.teachers where email= $1`
             setUpDb.query(query, [teacherEmail])
                 .then((res) => {
                     resolve(res.rows.length)
@@ -105,7 +103,7 @@ const checkTeacher = (teacherEmail) => {
 const checkStudent = (studentEmail) => {
     return new Promise((resolve, reject) => {
         if (checkEmail(studentEmail)) {
-        const query = `Select * from ${schema}.students where email= $1`
+        const query = `Select * from ${process.env.SCHEMA}.students where email= $1`
         setUpDb.query(query, [studentEmail])
             .then((res) => {
                 resolve(res.rows.length)
@@ -120,7 +118,7 @@ const checkStudent = (studentEmail) => {
 /** check Teacher exist in database */
 const checkStudentUnderTeacher = (studentEmail, teacherEmail) => {
     return new Promise((resolve, reject) => {
-        const query = `select from ${schema}.teachers_students where teacher_email = $1 and student_email = $2`
+        const query = `select from ${process.env.SCHEMA}.teachers_students where teacher_email = $1 and student_email = $2`
         setUpDb.query(query, [teacherEmail,studentEmail])
             .then((res) => {
                 resolve(res.rows.length)
@@ -134,7 +132,7 @@ const insertStudent = (email) => {
     return new Promise((resolve, reject) => {
         if (checkEmail(email)) {
             setUpDb.connect();
-            const query = `INSERT INTO ${schema}.students("email","status") VALUES ($1, $2) RETURNING *`
+            const query = `INSERT INTO ${process.env.SCHEMA}.students("email","status") VALUES ($1, $2) RETURNING *`
             setUpDb.query(query, [email, true])
                 .then(() => resolve())
                 .catch(err => reject(err))
@@ -148,7 +146,7 @@ const insertStudent = (email) => {
 const insertTeacherStudent = (teacher,studentEmail) => {
     return new Promise((resolve, reject) => {
         if(checkEmail(teacher) && checkEmail(studentEmail)){
-            const teachersStudentsInsert = `INSERT INTO ${schema}.teachers_students("teacher_email", "student_email") VALUES ($1, $2) RETURNING *`
+            const teachersStudentsInsert = `INSERT INTO ${process.env.SCHEMA}.teachers_students("teacher_email", "student_email") VALUES ($1, $2) RETURNING *`
             setUpDb.query(teachersStudentsInsert, [teacher, studentEmail])
                 .then(() => resolve())
                 .catch(err => reject(err))
@@ -180,7 +178,7 @@ exports.findCommonStudents = (params) => {
 
 /** Query for student teacher mapping, response only send when loop completed*/
 const findStudentsTeacher = (type, params,callback) => {
-    let query = `SELECT student_email from ${schema}.teachers_students WHERE teacher_email in `;
+    let query = `SELECT student_email from ${process.env.SCHEMA}.teachers_students WHERE teacher_email in `;
     let result = [], count = 0;
     setUpDb.connect();
     if(type){
@@ -218,7 +216,7 @@ const findIntersection= (arrays) => {
 exports.updateSuspend = function (body) {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
-        const query = `UPDATE ${schema}.students set status=$1 where email=$2`
+        const query = `UPDATE ${process.env.SCHEMA}.students set status=$1 where email=$2`
         const values = [false, body.student];
 
         setUpDb.query(query, values)
@@ -236,7 +234,7 @@ exports.updateSuspend = function (body) {
 exports.findActiveStudent = function (body) {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
-        const query = `SELECT * from ${schema}.students where status=$1 and email in (select student_email from teachers_students where teacher_email = $2)`
+        const query = `SELECT * from ${process.env.SCHEMA}.students where status=$1 and email in (select student_email from teachers_students where teacher_email = $2)`
         const values = [true, body.teacher];
 
         setUpDb.query(query, values)
