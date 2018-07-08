@@ -6,17 +6,21 @@
 
 const setUpDb = require('./setUpDb');
 const constant = require('../constant');
+const schema = process.env.SCHEMA;
 
 /** Query to insert teacher */
 exports.insertTeacher = (body) => {
     return new Promise((resolve, reject) => {
-        setUpDb.connect();
-        const query = 'INSERT INTO teachers("email") VALUES ($1) RETURNING email'
-        const value = [body.teacher];
+        if(checkEmail(body.teacher)){
+            setUpDb.connect();
+            const query = `INSERT INTO ${schema}.teachers("email") VALUES ($1) RETURNING email`
+            setUpDb.query(query, [body.teacher])
+                .then(response => resolve(response.rows))
+                .catch(err => reject(err))
+        }else {
+            reject('Email is not valid')
+        }
 
-        setUpDb.query(query, value)
-            .then(response => resolve(response.rows))
-            .catch(err => reject(err))
     })
 }
 
@@ -27,125 +31,139 @@ exports.registerStudent = (body) => {
         setUpDb.connect();
         checkTeacher(body.teacher)
             .then((rowCount) => {
-                    if (rowCount === 0) {
-                        console.log('no teacher exist')
-                        reject('no teacher exist')
-                    } else {
-                        console.log('teacher exist')
-                        body.students.forEach(ele => {
-                            console.log('check student: ', ele)
-                            checkStudent(ele)
-                                .then((rowCount) => {
-                                    if (rowCount === 0) {
-                                        console.log('no student, insert student')
-                                        insertStudent(ele)
-                                            .then(() => {
+                if (rowCount === 0) {
+                    console.log('no teacher exist')
+                    reject('Teacher '+body.teacher+ ' not exist in database')
+                } else {
+                    console.log('teacher exist')
+                    body.students.forEach(ele => {
+                        console.log('check student: ', ele)
+                        checkStudent(ele)
+                            .then((rowCount) => {
+                                if (rowCount === 0) {
+                                    console.log('no student, insert student')
+                                    insertStudent(ele)
+                                        .then(() => {
+                                            insertTeacherStudent(body.teacher, ele)
+                                                .then(() => {
+                                                    console.log('insert teacher_student table');
+                                                    count = count + 1;
+                                                    (count === body.students.length ? resolve() : '')
+                                                })
+                                                .catch(err => reject(err))
+                                        })
+                                        .catch(err => reject(err))
+                                } else {
+                                    console.log('student exist')
+                                    checkStudentUnderTeacher(ele, body.teacher)
+                                        .then((rowCount) => {
+                                            console.log('check student_teacher row exist')
+                                            if (rowCount === 0) {
+                                                console.log('check student_teacher row === 0')
                                                 insertTeacherStudent(body.teacher, ele)
                                                     .then(() => {
                                                         console.log('insert teacher_student table');
                                                         count = count + 1;
-                                                        /*if(count === body.students.length) {
-                                                            resolve()
-                                                        }*/
                                                         (count === body.students.length ? resolve() : '')
                                                     })
                                                     .catch(err => reject(err))
-                                            })
-                                            .catch(err => reject(err))
-                                    } else {
-                                        console.log('student exist')
-                                        checkStudentUnderTeacher(ele, body.teacher)
-                                            .then((rowCount) => {
-                                                console.log('check student_teacher row exist')
-                                                if (rowCount === 0) {
-                                                    console.log('check student_teacher row === 0')
-                                                    insertTeacherStudent(body.teacher, ele)
-                                                        .then(() => {
-                                                            console.log('insert teacher_student table');
-                                                            count = count + 1;
-                                                            (count === body.students.length ? resolve() : '')
-                                                        })
-                                                        .catch(err => reject(err))
-                                                } else {
-                                                    console.log('check student_teacher row === 1')
-                                                    count = count + 1;
-                                                    (count === body.students.length ? resolve() : '')
-                                                }
-                                            })
-                                            .catch()
-                                    }
-                                })
-                                .catch()
-                        })
-                    }
-                })
-            .catch()
+                                            } else {
+                                                console.log('check student_teacher row === 1')
+                                                count = count + 1;
+                                                reject('Student '+ele+' already register under teacher')
+                                                // (count === body.students.length ? reject('Student '+ele+' already register under teacher') : '')
+                                            }
+                                        })
+                                        .catch(err => reject(err))
+                                }
+                            })
+                            .catch(err => reject(err))
+                    })
+                }
+            })
+            .catch(err => reject(err))
     })
 }
 
 /** check Teacher exist in database */
 const checkTeacher = (teacherEmail) => {
     return new Promise((resolve, reject) => {
-        const query = 'Select * from teachers where email= $1'
-        setUpDb.query(query, [teacherEmail])
-            .then((res) => {
-                resolve(res.rows.length)
-            })
-            .catch(err => {
-                reject(err)
-            })
+        if (checkEmail(teacherEmail)) {
+            const query = `Select * from ${schema}.teachers where email= $1`
+            setUpDb.query(query, [teacherEmail])
+                .then((res) => {
+                    resolve(res.rows.length)
+                })
+                .catch(err => reject(err))
+        } else {
+            reject('Teacher email is not valid')
+        }
     })
 }
 
 /** check Student existence in table */
 const checkStudent = (studentEmail) => {
     return new Promise((resolve, reject) => {
-        const query = 'Select * from students where email= $1'
+        if (checkEmail(studentEmail)) {
+        const query = `Select * from ${schema}.students where email= $1`
         setUpDb.query(query, [studentEmail])
             .then((res) => {
                 resolve(res.rows.length)
             })
-            .catch(err => {
-                reject(err)
-            })
+            .catch(err => reject(err))
+        } else {
+            reject('Student email is not valid')
+        }
     })
 }
 
 /** check Teacher exist in database */
 const checkStudentUnderTeacher = (studentEmail, teacherEmail) => {
     return new Promise((resolve, reject) => {
-        const query = 'select  from teachers_students where teacher_email = $1 and student_email = $2'
+        const query = `select from ${schema}.teachers_students where teacher_email = $1 and student_email = $2`
         setUpDb.query(query, [teacherEmail,studentEmail])
             .then((res) => {
                 resolve(res.rows.length)
             })
-            .catch(err => {
-                reject(err)
-            })
+            .catch(err => reject(err))
     })
 }
 
 /** Query to insert student*/
 const insertStudent = (email) => {
     return new Promise((resolve, reject) => {
-        setUpDb.connect();
-        const query = 'INSERT INTO students("email","status") VALUES ($1, $2) RETURNING *'
-
+        if (checkEmail(email)) {
+            setUpDb.connect();
+            const query = `INSERT INTO ${schema}.students("email","status") VALUES ($1, $2) RETURNING *`
             setUpDb.query(query, [email, true])
                 .then(() => resolve())
                 .catch(err => reject(err))
-        })
+        } else {
+            reject('Student email is not valid')
+        }
+    })
 }
 
 /** Query to insert teacher student table*/
 const insertTeacherStudent = (teacher,studentEmail) => {
     return new Promise((resolve, reject) => {
-    const teachersStudentsInsert = 'INSERT INTO teachers_students("teacher_email", "student_email") VALUES ($1, $2) RETURNING *'
-        setUpDb.query(teachersStudentsInsert, [teacher, studentEmail])
-            .then(() => resolve())
-            .catch(err => reject(err))
+        if(checkEmail(teacher) && checkEmail(studentEmail)){
+            const teachersStudentsInsert = `INSERT INTO ${schema}.teachers_students("teacher_email", "student_email") VALUES ($1, $2) RETURNING *`
+            setUpDb.query(teachersStudentsInsert, [teacher, studentEmail])
+                .then(() => resolve())
+                .catch(err => reject(err))
+        }else {
+            reject('Email is not valid')
+        }
     })
 }
+
+/** Email validation*/
+const checkEmail = (email) => {
+    var reg = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    return reg.test(String(email).toLowerCase());
+}
+
 
 /** Query to find common students */
 exports.findCommonStudents = (params) => {
@@ -162,7 +180,7 @@ exports.findCommonStudents = (params) => {
 
 /** Query for student teacher mapping, response only send when loop completed*/
 const findStudentsTeacher = (type, params,callback) => {
-    let query = 'SELECT student_email from teachers_students WHERE teacher_email in ';
+    let query = `SELECT student_email from ${schema}.teachers_students WHERE teacher_email in `;
     let result = [], count = 0;
     setUpDb.connect();
     if(type){
@@ -200,7 +218,7 @@ const findIntersection= (arrays) => {
 exports.updateSuspend = function (body) {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
-        const query = 'UPDATE students set status=$1 where email=$2'
+        const query = `UPDATE ${schema}.students set status=$1 where email=$2`
         const values = [false, body.student];
 
         setUpDb.query(query, values)
@@ -218,7 +236,7 @@ exports.updateSuspend = function (body) {
 exports.findActiveStudent = function (body) {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
-        const query = 'SELECT * from students where status=$1 and email in (select student_email from teachers_students where teacher_email = $2)'
+        const query = `SELECT * from ${schema}.students where status=$1 and email in (select student_email from teachers_students where teacher_email = $2)`
         const values = [true, body.teacher];
 
         setUpDb.query(query, values)

@@ -23,7 +23,7 @@ exports.studentRegistration = (req, res, next) => {
     query.registerStudent(req.body)
         .then(() => res.sendStatus(204))
         .catch(err => {
-            let error = new Error(handleError(err));
+            let error = new Error(err);
             error.statusCode = 400;
             next(error)
         })
@@ -77,7 +77,7 @@ const handleError = (err) => {
             message = 'Email \'' + dubEmail.substring(1, dubEmail.length - 1) + '\' already exist'
         }
     } else {
-        message = 'server error'
+        message = err
     }
     return message;
 }
