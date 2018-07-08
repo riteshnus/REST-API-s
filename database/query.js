@@ -31,21 +31,16 @@ exports.registerStudent = (body) => {
         checkTeacher(body.teacher)
             .then((rowCount) => {
                 if (rowCount === 0) {
-                    console.log('no teacher exist')
                     reject('Teacher '+body.teacher+ ' not exist in database')
                 } else {
-                    console.log('teacher exist')
                     body.students.forEach(ele => {
-                        console.log('check student: ', ele)
                         checkStudent(ele)
                             .then((rowCount) => {
                                 if (rowCount === 0) {
-                                    console.log('no student, insert student')
                                     insertStudent(ele)
                                         .then(() => {
                                             insertTeacherStudent(body.teacher, ele)
                                                 .then(() => {
-                                                    console.log('insert teacher_student table');
                                                     count = count + 1;
                                                     (count === body.students.length ? resolve() : '')
                                                 })
@@ -53,21 +48,16 @@ exports.registerStudent = (body) => {
                                         })
                                         .catch(err => reject(err))
                                 } else {
-                                    console.log('student exist')
                                     checkStudentUnderTeacher(ele, body.teacher)
                                         .then((rowCount) => {
-                                            console.log('check student_teacher row exist')
                                             if (rowCount === 0) {
-                                                console.log('check student_teacher row === 0')
                                                 insertTeacherStudent(body.teacher, ele)
                                                     .then(() => {
-                                                        console.log('insert teacher_student table');
                                                         count = count + 1;
                                                         (count === body.students.length ? resolve() : '')
                                                     })
                                                     .catch(err => reject(err))
                                             } else {
-                                                console.log('check student_teacher row === 1')
                                                 count = count + 1;
                                                 reject('Student '+ele+' already register under teacher')
                                             }
@@ -234,7 +224,7 @@ exports.updateSuspend = function (body) {
 exports.findActiveStudent = function (body) {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
-        const query = `SELECT * from ${process.env.SCHEMA}.students where status=$1 and email in (select student_email from teachers_students where teacher_email = $2)`
+        const query = `SELECT * from ${process.env.SCHEMA}.students where status=$1 and email in (select student_email from ${process.env.SCHEMA}.teachers_students where teacher_email = $2)`
         const values = [true, body.teacher];
 
         setUpDb.query(query, values)
