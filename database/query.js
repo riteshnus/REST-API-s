@@ -25,34 +25,108 @@ exports.registerStudent = (body) => {
     let count = 0;
     return new Promise((resolve, reject) => {
         setUpDb.connect();
-        const query = 'Select email from students where email= $1'
-        body.students.forEach(ele => {
-            setUpDb.query(query, [ele])
-                .then((res) => {
-                    if (res.rows.length === 0) {
-                        this.insertStudent(ele)
-                            .then(() => {})
-                            .catch(err => reject(err))
-                    }
-
-                    this.insertTeacherStudent(body.teacher, ele)
-                        .then(() => {
-                            count = count+1;
-                            if(count === body.students.length) {
-                                resolve()
-                            }
+        checkTeacher(body.teacher)
+            .then((rowCount) => {
+                    if (rowCount === 0) {
+                        console.log('no teacher exist')
+                        reject('no teacher exist')
+                    } else {
+                        console.log('teacher exist')
+                        body.students.forEach(ele => {
+                            console.log('check student: ', ele)
+                            checkStudent(ele)
+                                .then((rowCount) => {
+                                    if (rowCount === 0) {
+                                        console.log('no student, insert student')
+                                        insertStudent(ele)
+                                            .then(() => {
+                                                insertTeacherStudent(body.teacher, ele)
+                                                    .then(() => {
+                                                        console.log('insert teacher_student table');
+                                                        count = count + 1;
+                                                        /*if(count === body.students.length) {
+                                                            resolve()
+                                                        }*/
+                                                        (count === body.students.length ? resolve() : '')
+                                                    })
+                                                    .catch(err => reject(err))
+                                            })
+                                            .catch(err => reject(err))
+                                    } else {
+                                        console.log('student exist')
+                                        checkStudentUnderTeacher(ele, body.teacher)
+                                            .then((rowCount) => {
+                                                console.log('check student_teacher row exist')
+                                                if (rowCount === 0) {
+                                                    console.log('check student_teacher row === 0')
+                                                    insertTeacherStudent(body.teacher, ele)
+                                                        .then(() => {
+                                                            console.log('insert teacher_student table');
+                                                            count = count + 1;
+                                                            (count === body.students.length ? resolve() : '')
+                                                        })
+                                                        .catch(err => reject(err))
+                                                } else {
+                                                    console.log('check student_teacher row === 1')
+                                                    count = count + 1;
+                                                    (count === body.students.length ? resolve() : '')
+                                                }
+                                            })
+                                            .catch()
+                                    }
+                                })
+                                .catch()
                         })
-                        .catch(err => reject(err))
+                    }
                 })
-                .catch(err => {
-                    new Error('student can not insert')
-                })
-        })
+            .catch()
+    })
+}
+
+/** check Teacher exist in database */
+const checkTeacher = (teacherEmail) => {
+    return new Promise((resolve, reject) => {
+        const query = 'Select * from teachers where email= $1'
+        setUpDb.query(query, [teacherEmail])
+            .then((res) => {
+                resolve(res.rows.length)
+            })
+            .catch(err => {
+                reject(err)
+            })
+    })
+}
+
+/** check Student existence in table */
+const checkStudent = (studentEmail) => {
+    return new Promise((resolve, reject) => {
+        const query = 'Select * from students where email= $1'
+        setUpDb.query(query, [studentEmail])
+            .then((res) => {
+                resolve(res.rows.length)
+            })
+            .catch(err => {
+                reject(err)
+            })
+    })
+}
+
+/** check Teacher exist in database */
+const checkStudentUnderTeacher = (studentEmail, teacherEmail) => {
+    return new Promise((resolve, reject) => {
+        const query = 'select  from teachers_students where teacher_email = $1 and student_email = $2'
+        setUpDb.query(query, [teacherEmail,studentEmail])
+            .then((res) => {
+                resolve(res.rows.length)
+            })
+            .catch(err => {
+                reject(err)
+            })
     })
 }
 
 /** Query to insert student*/
-exports.insertStudent = (email) => {
+const insertStudent = (email) => {
     return new Promise((resolve, reject) => {
         setUpDb.connect();
         const query = 'INSERT INTO students("email","status") VALUES ($1, $2) RETURNING *'
@@ -64,7 +138,7 @@ exports.insertStudent = (email) => {
 }
 
 /** Query to insert teacher student table*/
-exports.insertTeacherStudent = (teacher,studentEmail) => {
+const insertTeacherStudent = (teacher,studentEmail) => {
     return new Promise((resolve, reject) => {
     const teachersStudentsInsert = 'INSERT INTO teachers_students("teacher_email", "student_email") VALUES ($1, $2) RETURNING *'
         setUpDb.query(teachersStudentsInsert, [teacher, studentEmail])
