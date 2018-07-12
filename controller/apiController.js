@@ -20,13 +20,19 @@ exports.teacherRegistration = (req, res, next) => {
 
 /**Student registration */
 exports.studentRegistration = (req, res, next) => {
-    query.registerStudent(req.body)
-        .then(() => res.sendStatus(204))
-        .catch(err => {
-            let error = new Error(err);
-            error.statusCode = 400;
-            next(error)
-        })
+    if(req.body.students.length>0){
+        query.registerStudent(req.body)
+            .then(() => res.sendStatus(204))
+            .catch(err => {
+                let error = new Error(err);
+                error.statusCode = 400;
+                next(error)
+            })
+    }else {
+        let error = new Error("No students list provided");
+        error.statusCode = 400;
+        next(error)
+    }
 }
 
 /**Common Students*/
